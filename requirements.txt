@@ -11,6 +11,6 @@ Pillow==9.4.0
 cloudinary==1.32.0
 django-cloudinary-storage==0.3.0
 whitenoise==6.6.0
-# gunicorn==22.0.0
+gunicorn==22.0.0
 # uvicorn==0.29.0
 # daphne==4.1.2 # daphne -b 0.0.0.0 -p 8000 FitnessifyAPI.asgi:application
