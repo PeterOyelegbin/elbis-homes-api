@@ -16,9 +16,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
         Return the appropriate permissions based on the action.
         """
         if self.action == 'list':
-            permission_classes = [permissions.IsAuthenticated]
-        else:
             permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     @swagger_auto_schema(responses={200: 'OK', 404: 'NOT FOUND'})
