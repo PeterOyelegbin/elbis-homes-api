@@ -31,9 +31,13 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'elbis.com', 'elbisapi.onrender.com']
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "https://.netlify.app", "https://elbis.com.ng", "https://elbisapi.onrender.app"]
+CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = ["https://elbisapi.onrender.app"]
+# CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "https://.netlify.app", "https://elbis.com.ng", "https://elbisapi.onrender.app"]
+
+CSRF_TRUSTED_ORIGINS = ['*']
+
+# CSRF_TRUSTED_ORIGINS = ["https://elbisapi.onrender.app"]
 
 # Application definition
 
