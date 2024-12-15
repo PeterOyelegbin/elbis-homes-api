@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Property
 from .serializers import PropertySerializer
 
@@ -10,23 +11,22 @@ class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     parser_classes = (MultiPartParser, FormParser)
+    search_fields = ['price']
 
     def get_permissions(self):
         """
         Return the appropriate permissions based on the action.
         """
-        if self.action == 'list':
-            permission_classes = [permissions.AllowAny]
-        elif self.action == 'retrieve':
+        if self.action in ['list', 'retrieve']:
             permission_classes = [permissions.AllowAny]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    @swagger_auto_schema(responses={200: 'OK', 404: 'NOT FOUND'})
+    @swagger_auto_schema(manual_parameters=[openapi.Parameter('search', openapi.IN_QUERY, description="Search by price", type=openapi.TYPE_STRING),], responses={200: 'OK', 404: 'NOT FOUND'})
     def list(self, request, *args, **kwargs):
         try:
-            objects = Property.objects.all()
+            objects = self.filter_queryset(self.get_queryset())
             if not objects:
                 raise Property.DoesNotExist
             serializer = self.get_serializer(objects, many=True)

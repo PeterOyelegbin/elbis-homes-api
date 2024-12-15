@@ -180,6 +180,9 @@ REST_FRAMEWORK = {
         'anon': '100/minute',
         'user': '200/minute',
     },
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.SearchFilter',
+    ],
 }
 
 

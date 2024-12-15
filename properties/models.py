@@ -1,6 +1,5 @@
 from django.db import models
 from uuid import uuid4
-# from accounts.models import UserModel, uuid4
 
 # Create your models here.
 class Property(models.Model):
@@ -8,13 +7,16 @@ class Property(models.Model):
     This model will serve as the property listing
     """
     PROPERTY_TYPE_CHOICES = [('rental', 'Rental'), ('purchase', 'Purchase')]
-    STATUS_CHOICES = [('available', 'Available'), ('sold', 'Sold'), ('rented', 'Rented')]
+    STATUS_CHOICES = [('available', 'Available'), ('unavailable', 'Unavailable'),('sold', 'Sold'), ('rented', 'Rented')]
 
     id = models.UUIDField(default=uuid4, unique=True, primary_key=True, editable=False)
-    title = models.CharField(max_length=255, db_index=True)
+    # title = models.CharField(max_length=255, db_index=True)
+    bedroom = models.PositiveSmallIntegerField(default=1)
+    bathroom = models.PositiveSmallIntegerField(default=1)
+    electricity = models.PositiveSmallIntegerField(default=100)
     description = models.TextField()
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPE_CHOICES)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.CharField(max_length=10)
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)

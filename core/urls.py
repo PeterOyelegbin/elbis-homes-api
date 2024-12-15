@@ -37,7 +37,7 @@ schema_view = get_schema_view(
    permission_classes=(permissions.AllowAny,),
 )
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=False)
 router.register(r'users/signup', SignUpView, basename="auth_signup")
 router.register(r'users/login', LogInView, basename="auth_login")
 router.register(r'users/logout', LogOutView, basename="auth_logout")
