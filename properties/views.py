@@ -17,6 +17,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         """
         if self.action == 'list':
             permission_classes = [permissions.AllowAny]
+        elif self.action == 'retrieve':
+            permission_classes = [permissions.AllowAny]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
