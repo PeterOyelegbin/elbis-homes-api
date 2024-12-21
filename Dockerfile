@@ -5,10 +5,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Set working directory in the container
-WORKDIR /eagleballot
+WORKDIR /elbis_homes
 
 # Copy the current directory contents into the working directory
-COPY . /eagleballot/
+COPY . /elbis_homes/
 
 # Install dependencies
 RUN pip install -r requirements.txt

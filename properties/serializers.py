@@ -6,3 +6,6 @@ class PropertySerializer(serializers.ModelSerializer):
         model = Property
         fields = '__all__'
         
+class EnquirySerializer(serializers.Serializer):
+    message = serializers.CharField(min_length=10, style={'base_template': 'textarea.html'})
+    

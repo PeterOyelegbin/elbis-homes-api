@@ -17,11 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework import permissions
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from users.views import SignUpView, LogInView, LogOutView
-from properties.views import PropertyViewSet
+from properties.views import PropertyViewSet, EnquiryViewSet
 
 # Swagger UI
 schema_view = get_schema_view(
@@ -42,6 +41,7 @@ router.register(r'users/signup', SignUpView, basename="auth_signup")
 router.register(r'users/login', LogInView, basename="auth_login")
 router.register(r'users/logout', LogOutView, basename="auth_logout")
 router.register(r'properties', PropertyViewSet, basename="manage-property")
+router.register(r'enquiry', EnquiryViewSet, basename="make-enquiry")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

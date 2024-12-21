@@ -3,8 +3,10 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from threading import Thread
+from utils import send_async_email, general_logger
 from .models import Property
-from .serializers import PropertySerializer
+from .serializers import PropertySerializer, EnquirySerializer
 
 # Create your views here.
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -52,7 +54,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             headers = self.get_success_headers(serializer.data)
-            print(headers)
             response_data = {
                 "success": True,
                 "status": 201,
@@ -61,10 +62,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
             }
             return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
         except Exception as e:
+            general_logger.error("An error occurred: %s", e)
             response_data = {
                 "success": False,
                 "status": 400,
-                "message": f"Validation error: {e}",
+                "message": "Validation error: Invalid input from user or empty fields",
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -93,6 +95,15 @@ class PropertyViewSet(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         try:
             instance = Property.objects.get(pk=pk)
+            if 'cover_image' in request.FILES:
+                if instance.cover_image:
+                    instance.cover_image.delete()
+            if 'bedroom_image' in request.FILES:
+                if instance.bedroom_image:
+                    instance.bedroom_image.delete()
+            if 'bathroom_image' in request.FILES:
+                if instance.bathroom_image:
+                    instance.bathroom_image.delete()
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -111,10 +122,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
             }
             return Response(response_data, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            general_logger.error("An error occurred: %s", e)
             response_data = {
                 "success": False,
                 "status": 400,
-                "message": f"Validation error: {e}",
+                "message": "Validation error: Invalid input from user or empty fields",
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -143,3 +155,42 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 "message": "Property does not exist",
             }
             return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        
+
+class EnquiryViewSet(viewsets.ViewSet):
+    serializer_class = EnquirySerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @swagger_auto_schema(request_body=EnquirySerializer, responses={200: 'OK', 400: 'BAD REQUEST', 500: 'SERVER ERROR'})
+    def create(self, request, *args, **kwargs):
+        serializer = EnquirySerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                auth_user = request.user
+                email_subject = f'Enquiry from {auth_user.first_name} {auth_user.last_name}'
+                email_body = serializer.validated_data['message']
+                email_recipient = ['test@peteroyelegbin.com.ng']
+                email_header = {'Reply-To': auth_user.email}
+                # Asynchronously handle send mail
+                Thread(target=send_async_email, args=(email_subject, email_body, email_recipient, email_header)).start()
+                response_data = {
+                    "success": True,
+                    "status": 200,
+                    "message": "Message successfully sent",
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
+            except Exception as e:
+                general_logger.error("An error occurred: %s", e)
+                response_data = {
+                    "success": False,
+                    "status": 500,
+                    "message": "An error occurred, kindly contact the support team.",
+                }
+                return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            response_data = {
+                "success": False,
+                "status": 400,
+                "message": "Message field is required and must be at least 10 characters",
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)

@@ -3,10 +3,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import authenticate
-from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from datetime import timedelta
-from .utils import CustomJWTAuthentication
+from utils import CustomJWTAuthentication, cache, general_logger
 from .serializers import SignUpSerializer, LogInSerializer
 
 # Create your views here.
@@ -33,10 +32,11 @@ class SignUpView(viewsets.ViewSet):
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
+            general_logger.error("An error occurred: %s", e)
             response_data = {
                 "success": False,
                 "status": 400,
-                "message": "Validation error: Invalid or empty fields",
+                "message": "Validation error: Invalid input from user or empty fields",
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,6 +75,7 @@ class LogInView(viewsets.ViewSet):
                 }
                 return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
+            general_logger.error("An error occurred: %s", e)
             response_data = {
                 'success': False,
                 'status': 400,
@@ -114,9 +115,10 @@ class LogOutView(viewsets.ViewSet):
                 }
                 return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            general_logger.error("An error occurred: %s", e)
             response_data = {
                 'success': False,
                 'status': 400,
-                'message': str(e),
+                'message': "Validation error occured",
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
