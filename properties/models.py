@@ -1,5 +1,6 @@
 from django.db import models
 from uuid import uuid4
+from users.models import UserModel
 
 # Create your models here.
 class Property(models.Model):
@@ -7,7 +8,7 @@ class Property(models.Model):
     This model will serve as the property listing
     """
     PROPERTY_TYPE_CHOICES = [('rental', 'Rental'), ('purchase', 'Purchase')]
-    STATUS_CHOICES = [('available', 'Available'), ('unavailable', 'Unavailable'),('sold', 'Sold'), ('rented', 'Rented')]
+    STATUS_CHOICES = [('available', 'Available'), ('unavailable', 'Unavailable')]
 
     id = models.UUIDField(default=uuid4, unique=True, primary_key=True, editable=False)
     # title = models.CharField(max_length=255, db_index=True)
@@ -27,9 +28,27 @@ class Property(models.Model):
     video_url = models.URLField()
     created_on = models.DateField(auto_now_add=True)
     updated_on = models.DateField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.id} {self.title} {self.price} {self.status}"
 
     class Meta:
         ordering = ['-updated_on']
+
+    def __str__(self):
+        return f"{self.id} {self.title} {self.price} {self.status}"
+    
+
+class Favorite(models.Model):
+    """
+    This model will serve as the property favorite listing
+    """
+    id = models.UUIDField(default=uuid4, unique=True, primary_key=True, editable=False)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'property')
+        ordering = ['-created_on']
+
+    def __str__(self):
+        return f"{self.user} - {self.property}"
+    

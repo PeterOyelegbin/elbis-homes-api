@@ -20,14 +20,14 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from users.views import SignUpView, LogInView, LogOutView
-from properties.views import PropertyViewSet, EnquiryViewSet
+from properties.views import PropertyViewSet, FavoriteViewSet, EnquiryViewSet
 
 # Swagger UI
 schema_view = get_schema_view(
    openapi.Info(
       title="ELBIS Homes API",
       default_version='v1',
-      description="Backend API for ELBIS Homes, a real estate platform to enhance Nigeria accommodation process.",
+      description="ELBIS Homes API is a Django-based server-side application that handles user authentication, property data management, and integration with a MySQL database. It is built using Python, Django Rest Framework, and JWT authentication, providing a robust and scalable foundation for real estate platforms.",
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="info@peteroyelegbin.com.ng"),
       license=openapi.License(name="BSD License"),
@@ -40,8 +40,9 @@ router = DefaultRouter(trailing_slash=False)
 router.register(r'users/signup', SignUpView, basename="auth_signup")
 router.register(r'users/login', LogInView, basename="auth_login")
 router.register(r'users/logout', LogOutView, basename="auth_logout")
-router.register(r'properties', PropertyViewSet, basename="manage-property")
-router.register(r'enquiry', EnquiryViewSet, basename="make-enquiry")
+router.register(r'properties', PropertyViewSet, basename="manage_property")
+router.register(r'favorites', FavoriteViewSet, basename="manage_favorites")
+router.register(r'enquiry', EnquiryViewSet, basename="make_enquiry")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

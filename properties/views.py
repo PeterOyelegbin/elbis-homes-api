@@ -5,8 +5,8 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from threading import Thread
 from utils import send_async_email, general_logger
-from .models import Property
-from .serializers import PropertySerializer, EnquirySerializer
+from .models import Property, Favorite
+from .serializers import PropertySerializer, FavoriteSerializer, EnquirySerializer
 
 # Create your views here.
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -71,7 +71,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(responses={200: 'OK', 404: 'NOT FOUND'})
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         try:
             instance = Property.objects.get(pk=pk)
             serializer = self.get_serializer(instance)
@@ -135,7 +135,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return self.update(request, pk, partial=True, *args, **kwargs)
 
     @swagger_auto_schema(responses={204: 'NO CONTENT', 404: 'NOT FOUND'})
-    def destroy(self, request, pk=None):
+    def destroy(self, request, pk=None, *args, **kwargs):
         try:
             instance = Property.objects.get(pk=pk)
             instance.cover_image.delete()
@@ -153,6 +153,98 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 "success": False,
                 "status": 404,
                 "message": "Property does not exist",
+            }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        
+
+class FavoriteViewSet(viewsets.ViewSet):
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Favorite.objects.none()
+        return Favorite.objects.filter(user=self.request.user)
+
+    @swagger_auto_schema(responses={200: 'OK', 404: 'NOT FOUND'})
+    def list(self, request, *args, **kwargs):
+        try:
+            favorites = self.get_queryset()
+            if not favorites:
+                raise Favorite.DoesNotExist
+            serializer = FavoriteSerializer(favorites, many=True)
+            response_data = {
+                "success": True,
+                "status": 200,
+                "message": "Favorites listed successfully",
+                "data": serializer.data
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Favorite.DoesNotExist:
+            response_data = {
+                "success": False,
+                "status": 404,
+                "message": "No records found",
+            }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(request_body=FavoriteSerializer, responses={201: 'CREATED', 400: 'BAD REQUEST', 404: 'NOT FOUND'})
+    def create(self, request, *args, **kwargs):
+        serializer = FavoriteSerializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            property_id = serializer.validated_data['property_id']
+            property = Property.objects.get(pk=property_id)
+            user = request.user
+            Favorite.objects.get_or_create(user=user, property=property)
+            response_data = {
+                "success": True,
+                "status": 201,
+                "message": "Property added to favorite",
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        except Property.DoesNotExist:
+            response_data = {
+                "success": False,
+                "status": 404,
+                "message": "Property does not exist",
+            }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            general_logger.error("An error occurred: %s", e)
+            response_data = {
+                "success": False,
+                "status": 400,
+                "message": "Validation error: an error occured",
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(responses={204: 'NO CONTENT', 404: 'NOT FOUND'})
+    def destroy(self, request, pk=None, *args, **kwargs):
+        try:
+            property = Property.objects.get(pk=pk)
+            user = request.user
+            favorite = Favorite.objects.get(user=user, property=property)
+            favorite.delete()
+            response_data = {
+                "success": True,
+                "status": 204,
+                "message": "Favorite deleted successfully",
+            }
+            return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+        except Property.DoesNotExist:
+            response_data = {
+                "success": False,
+                "status": 404,
+                "message": "Property does not exist",
+            }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        except Favorite.DoesNotExist:
+            response_data = {
+                "success": False,
+                "status": 404,
+                "message": "Favorite does not exist",
             }
             return Response(response_data, status=status.HTTP_404_NOT_FOUND)
         
@@ -194,3 +286,4 @@ class EnquiryViewSet(viewsets.ViewSet):
                 "message": "Message field is required and must be at least 10 characters",
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        
