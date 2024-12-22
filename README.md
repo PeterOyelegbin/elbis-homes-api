@@ -1,105 +1,65 @@
-# ELBIS Homes API
-ELBIS Homes is a real estate platform designed to simplify the process of renting or buying properties in Nigeria. This API provides the backend infrastructure necessary for user authentication, property management, and interaction with a database of available properties.
+# ELBIS Homes - Real Estate Platform API
+**Technologies Used:**
+- **Backend Framework:** Django REST Framework
+- **Authentication:** JWT (JSON Web Token)
+- **Database:** MySQL
+- **Storage:** AWS S3 Bucket
 
 ---
 
-## Table of Contents
-* [Introduction](#introduction)
-* [Features](#features)
-* [Installation](#installation)
-* [Usage](#usage)
-* [To-Do](#to-do)
-* [Acknowledgements](#acknowledgements)
+## Problem Statement
+In Nigeria, the process of renting or buying properties is often cumbersome, and fraught with issues like unreliable listings, lack of transparency, and inadequate communication between buyers, sellers, and agents. Traditional methods are time-consuming, requiring multiple physical visits and interactions to finalize a deal. This often leads to frustration and inefficiency, deterring potential buyers and renters.
+
+## Solution
+ELBIS Homes is designed to streamline and modernize the real estate market in Nigeria. The platform addresses the common issues by providing a centralized, reliable, and transparent system for property transactions. Here's how it solves the problem:
+1. **Centralized Listings:**
+   - **Feature:** Comprehensive database of properties for rent and sale.
+   - **Benefit:** Users can easily browse through available properties without needing to visit multiple websites or contact numerous agents.
+
+2. **Enhanced Transparency:**
+   - **Feature:** Detailed property information including high-quality images, descriptions, and location.
+   - **Benefit:** Potential buyers and renters have all the necessary information upfront, reducing the need for multiple physical visits.
+
+3. **Efficient Communication:**
+   - **Feature:** Integrated messaging system for direct communication between buyers, sellers, and agents.
+   - **Benefit:** Facilitates quicker negotiations and decision-making.
+
+4. **Secure Transactions:**
+   - **Feature:** JWT authentication ensures secure access to user accounts and personal data.
+   - **Benefit:** Protects user information and builds trust in the platform.
+
+5. **Scalable Storage:**
+   - **Feature:** Utilization of AWS S3 Bucket for storing property images and documents.
+   - **Benefit:** Ensures scalable and reliable storage, allowing for a large number of high-resolution images without compromising performance.
 
 ---
 
-## Introduction
-The ELBIS Homes API is a Django-based server-side application that handles user authentication, property data management, and integration with a MySQL database. It is built using Python, Django Rest Framework, and JWT authentication, providing a robust and scalable foundation for real estate platforms. This project is designed for ease of use, allowing for quick integration with front-end applications or other systems.
+## Project Implementation
+1. **Backend Development:**
+   - **Framework:** Utilized Django REST Framework to create a robust and scalable API.
+   - **Endpoints:** Designed RESTful endpoints for property listings, user authentication, favorites, and enquiry.
+   - **Security:** Implemented JWT authentication to secure user data and sessions.
+
+2. **Database Management:**
+   - **Database:** Used MySQL to manage user and property data efficiently.
+   - **ORM:** Leveraged Django's ORM for database operations, ensuring clean and maintainable code.
+
+3. **Cloud Storage:**
+   - **Storage Service:** Integrated AWS S3 Bucket for storing property images and documents.
+   - **Benefits:** Provided scalable storage solutions, ensuring quick access and retrieval of media files.
+
+4. **Testing and Deployment:**
+   - **Testing:** Conducted extensive testing to ensure API reliability and performance.
+   - **Deployment:** Deployed the API on a cloud service, ensuring high availability and scalability.
 
 ---
 
-## Features
-- **Python Version**: 3.9
-- **Python Decouple**: 3.8
-- **Django Version**: 3.2
-- **Django Rest Framework**: 3.15.1
-- **SimpleJWT**: 5.3.1
-- **Pillow**: 9.4.0
-- **Cloudinary Integration**: 1.32 (for image management)
-- **Database**: 
-  - SQLite for local development
-  - MySQL for production (via `mysqlclient` 2.1.1)
-- **Basic Folder Structure**: Organized Django apps for scalability
-- **JWT Authentication**: Secure token-based authentication for users
-- **Property Management**: CRUD operations for properties (add, update, delete, retrieve)
+## Impact
+- **User Experience:** Enhanced user experience by providing a seamless and efficient way to find and negotiate property deals.
+- **Market Efficiency:** Increased market efficiency by reducing the time and effort required to close property transactions.
+- **Trust and Transparency:** Built trust in the real estate market through reliable listings and secure transactions.
 
 ---
 
-## Installation
-Before you start, ensure the following prerequisites are installed:
-- **Python** (version 3.9)
-- **Pip** (Python package manager)
-  
-### Steps to Install
-1. **Clone the repository** to your local machine:
-    ```bash
-    git clone https://github.com/PeterOyelegbin/elbis-homes-api.git
-    ```
-
-2. **Navigate to the project directory**:
-    ```bash
-    cd elbis-homes-api
-    ```
-
-3. **Create a virtual environment**:
-    On macOS/Linux:
-    ```bash
-    python3 -m venv env
-    ```
-    On Windows:
-    ```bash
-    python -m venv env
-    ```
-
-4. **Activate the virtual environment**:
-    On macOS/Linux:
-    ```bash
-    source env/bin/activate
-    ```
-    On Windows:
-    ```bash
-    env\Scripts\activate
-    ```
-
-5. **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-6. **Run database migrations** to set up the SQLite database:
-    ```bash
-    python manage.py makemigrations
-    python manage.py migrate
-    ```
-
-7. **Start the development server**:
-    ```bash
-    python manage.py runserver
-    ```
-
-8. Open your web browser and navigate to `http://127.0.0.1:8000/` to see the Django API view page.
-
----
-
-## To-Do
-Future enhancements are planned for this API:
-- **Favorites**: Enable users to save favorite properties.
-- **Reviews**: Allow users to leave reviews for properties.
-- **Search and Filters**: Advanced search and filtering options based on property type, price range, location, etc.
-
-Additional features will be added in subsequent versions.
-
----
-
-## Acknowledgements
-Special thanks to **[Frontend dev](https://philipoyelegbin.github.io)** for integrating this API with a React frontend, creating a fully functional real estate application.
+## Conclusion
+ELBIS Homes is a significant step towards modernizing the real estate market in Nigeria. By leveraging advanced technologies and addressing key pain points, the platform simplifies the process of renting and buying properties, benefiting both users and the market as a whole.
