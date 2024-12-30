@@ -7,11 +7,10 @@ class Property(models.Model):
     """
     This model will serve as the property listing
     """
-    PROPERTY_TYPE_CHOICES = [('rental', 'Rental'), ('purchase', 'Purchase')]
-    STATUS_CHOICES = [('available', 'Available'), ('unavailable', 'Unavailable')]
+    PROPERTY_TYPE_CHOICES = [('Rental', 'Rental'), ('Purchase', 'Purchase')]
+    STATUS_CHOICES = [('Available', 'Available'), ('Unavailable', 'Unavailable')]
 
     id = models.UUIDField(default=uuid4, unique=True, primary_key=True, editable=False)
-    # title = models.CharField(max_length=255, db_index=True)
     bedroom = models.PositiveSmallIntegerField(default=1)
     bathroom = models.PositiveSmallIntegerField(default=1)
     electricity = models.PositiveSmallIntegerField(default=100)
