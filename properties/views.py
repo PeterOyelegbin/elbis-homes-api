@@ -13,7 +13,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     parser_classes = (MultiPartParser, FormParser)
-    search_fields = ['price']
+    search_fields = ['bedroom', 'property_type', 'price', 'state', 'status']
 
     def get_permissions(self):
         """
@@ -25,7 +25,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    @swagger_auto_schema(manual_parameters=[openapi.Parameter('search', openapi.IN_QUERY, description="Search by price", type=openapi.TYPE_STRING),], responses={200: 'OK', 404: 'NOT FOUND'})
+    @swagger_auto_schema(manual_parameters=[openapi.Parameter('search', openapi.IN_QUERY, description="Search by bedroom, property_type, price, state, or status", type=openapi.TYPE_STRING),], responses={200: 'OK', 404: 'NOT FOUND'})
     def list(self, request, *args, **kwargs):
         try:
             objects = self.filter_queryset(self.get_queryset())
