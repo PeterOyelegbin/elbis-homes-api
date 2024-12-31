@@ -111,7 +111,10 @@ DATABASES = {
         'PORT': config('DB_PORT'),
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASS')
+        'PASSWORD': config('DB_PASS'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 

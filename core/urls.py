@@ -29,7 +29,7 @@ schema_view = get_schema_view(
       default_version='v1',
       description="ELBIS Homes API is a Django-based server-side application that handles user authentication, property data management, and integration with a MySQL database. It is built using Python, Django Rest Framework, and JWT authentication, providing a robust and scalable foundation for real estate platforms.",
       terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="info@peteroyelegbin.com.ng"),
+      contact=openapi.Contact(name="Peter Oyelegbin", url="https://peteroyelegbin.com.ng", email="info@peteroyelegbin.com.ng"),
       license=openapi.License(name="BSD License"),
    ),
    public=True,

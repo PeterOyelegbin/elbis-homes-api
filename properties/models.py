@@ -7,7 +7,8 @@ class Property(models.Model):
     """
     This model will serve as the property listing
     """
-    PROPERTY_TYPE_CHOICES = [('Rental', 'Rental'), ('Purchase', 'Purchase')]
+    PROPERTY_TYPE_CHOICES = [('1 Room', '1 Room'), ('Self Contain', 'Self Contain'), ('Flat', 'Flat'), ('Duplex', 'Duplex'), ('Bungalow', 'Bungalow')]
+
     STATUS_CHOICES = [('Available', 'Available'), ('Unavailable', 'Unavailable')]
 
     id = models.UUIDField(default=uuid4, unique=True, primary_key=True, editable=False)
@@ -22,8 +23,9 @@ class Property(models.Model):
     state = models.CharField(max_length=100)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
     cover_image = models.ImageField(upload_to='elbis/cover_images/')
-    bedroom_image = models.ImageField(upload_to='elbis/bedroom_images/')
-    bathroom_image = models.ImageField(upload_to='elbis/bathroom_images/')
+    parlor_image = models.ImageField(upload_to='elbis/parlor_image/', blank=True)
+    bedroom_image = models.ImageField(upload_to='elbis/bedroom_images/', blank=True)
+    bathroom_image = models.ImageField(upload_to='elbis/bathroom_images/', blank=True)
     video_url = models.URLField()
     created_on = models.DateField(auto_now_add=True)
     updated_on = models.DateField(auto_now=True)
