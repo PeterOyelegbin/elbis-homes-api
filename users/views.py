@@ -2,11 +2,14 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
+from django_rest_passwordreset.models import ResetPasswordToken
 from django.contrib.auth import authenticate
 from drf_yasg.utils import swagger_auto_schema
 from datetime import timedelta
-from utils import CustomJWTAuthentication, cache, general_logger
-from .serializers import SignUpSerializer, LogInSerializer
+from threading import Thread
+from utils import CustomJWTAuthentication, send_async_email, cache, general_logger
+from .serializers import SignUpSerializer, LogInSerializer, ResetPasswordSerializer, ConfirmPasswordSerializer
+from .models import UserModel
 
 # Create your views here.
 class SignUpView(viewsets.ViewSet):
@@ -18,19 +21,31 @@ class SignUpView(viewsets.ViewSet):
     serializer_class = SignUpSerializer
     permission_classes = [AllowAny]
 
-    @swagger_auto_schema(request_body=SignUpSerializer, responses={201: 'CREATED', 400: 'BAD REQUEST'})
+    @swagger_auto_schema(request_body=SignUpSerializer, responses={201: 'CREATED', 400: 'BAD REQUEST', 401: 'UNAUTHORIZED'})
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            response_data = {
-                "success": True,
-                "status": 201,
-                "message": "User sign up successful",
-                "data": serializer.data
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
+            user = authenticate(username=email, password=password)
+            if user is not None:
+                access_token = AccessToken.for_user(user)
+                response_data = {
+                    'success': True,
+                    'status': 200,
+                    'message': 'Signup successful',
+                    'access_token': str(access_token),
+                }
+                return Response(response_data, status=status.HTTP_201_CREATED)
+            else:
+                response_data = {
+                    'success': False,
+                    'status': 401,
+                    'message': 'Invalid credentials',
+                }
+                return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             general_logger.error("An error occurred: %s", e)
             response_data = {
@@ -122,3 +137,95 @@ class LogOutView(viewsets.ViewSet):
                 'message': "Validation error occured",
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class ResetPasswordView(viewsets.ViewSet):
+    """
+        Password Reset Endpoint
+
+        Initiate a password reset as a register user. 
+    """
+    serializer_class = ResetPasswordSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(request_body=ResetPasswordSerializer, responses={200: 'OK', 404: 'NOT FOUND', 500:'SERVER ERROR'})
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            email = serializer.validated_data.get('email')
+            user = UserModel.objects.get(email=email)
+            token = ResetPasswordToken.objects.create(user=user)
+            email_subject = 'ELBIS Homes: Password Reset Request'
+            email_body = f"""Dear {token.user},\n\nYou have requested a password reset. Use the following token to reset your password:\n\nToken: {token.key}\n\nPS: Please ignore if you did not initiate this process.\n\n
+            Regards,\nELBIS Homes"""
+            recipient = [token.user.email]
+            # Asynchronously handle send mail
+            Thread(target=send_async_email, args=(email_subject, email_body, recipient)).start()
+            response_data = {
+                'success': True,
+                'status': 200,
+                'message': 'Password reset token has been sent to your mail.',
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            response_data = {
+                'success': False,
+                'status': 404,
+                'message': 'User does not exist!',
+            }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            general_logger.error("Exception error occurred: %s", e)
+            response_data = {
+                'success': False,
+                'status': 500,
+                'message': 'An error occurred, kindly contact support!',
+            }
+            return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class ConfirmPasswordView(viewsets.ViewSet):
+    """
+        Password Confirmation Endpoint
+
+        Confirm the new password as a register user. 
+    """
+    serializer_class = ConfirmPasswordSerializer
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(request_body=ConfirmPasswordSerializer, responses={200: 'OK', 400: 'BAD REQUEST', 500:'SERVER ERROR'})
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            otp_token = serializer.validated_data.get('token')
+            password = serializer.validated_data.get('password')
+            token = ResetPasswordToken.objects.select_related('user').get(key=otp_token)
+            user = token.user
+            user.set_password(password)
+            user.save()
+            token.delete()
+            response_data = {
+                'success': True,
+                'status': 200,
+                'message': 'Password has been reset successfully.',
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except ResetPasswordToken.DoesNotExist as e:
+            general_logger.error("Token error occurred: %s", e)
+            response_data = {
+                'success': False,
+                'status': 400,
+                'message': 'Invalid or expired token!',
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            general_logger.error("Exception error occurred: %s", e)
+            response_data = {
+                'success': False,
+                'status': 500,
+                'message': 'An error occurred, kindly contact support!'
+            }
+            return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        

@@ -67,7 +67,7 @@ general_logger = logging.getLogger('general_logger')
 
 
 # Asynchronous email sending
-def send_async_email(email_subject, email_body, email_recipient, email_headers):
+def send_async_email(email_subject, email_body, email_recipient, email_headers=None):
     try:
         email_sender = settings.DEFAULT_FROM_EMAIL
         email = EmailMultiAlternatives(email_subject, email_body, email_sender, email_recipient, headers=email_headers)

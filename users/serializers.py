@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.validators import MinLengthValidator
 from .models import UserModel
 
 
@@ -20,3 +21,12 @@ class LogInSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('email', 'password')
+        
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    
+
+class ConfirmPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(validators=[MinLengthValidator(6)])

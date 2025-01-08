@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     # 3rd-party libraries
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'django_rest_passwordreset',
     'corsheaders',
     'drf_yasg',
     "cloudinary",

@@ -20,7 +20,7 @@ class UserModel(AbstractUser):
     objects = UserModelManager()
 
     def __str__(self):
-        return f"{self.email}"
+        return f"{self.first_name} {self.last_name}"
 
     class Meta:
         ordering = ['-date_joined']
