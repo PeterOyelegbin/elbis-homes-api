@@ -155,11 +155,10 @@ class ResetPasswordView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             email = serializer.validated_data.get('email')
             user = UserModel.objects.get(email=email)
-            token = ResetPasswordToken.objects.create(user=user)
+            token, _ = ResetPasswordToken.objects.get_or_create(user=user)
             email_subject = 'ELBIS Homes: Password Reset Request'
-            email_body = f"""Dear {token.user},\n\nYou have requested a password reset. Use the following token to reset your password:\n\nToken: {token.key}\n\nPS: Please ignore if you did not initiate this process.\n\n
-            Regards,\nELBIS Homes"""
-            recipient = [token.user.email]
+            email_body = f"""Dear {user},\n\nYou have requested a password reset. Use the following token to reset your password:\n\nToken: {token.key}\n\nPS: Please ignore if you did not initiate this process.\n\nRegards,\nELBIS Homes"""
+            recipient = [user.email]
             # Asynchronously handle send mail
             Thread(target=send_async_email, args=(email_subject, email_body, recipient)).start()
             response_data = {
