@@ -22,7 +22,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             permission_classes = [permissions.AllowAny]
         else:
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = [permissions.IsAdminUser]
         return [permission() for permission in permission_classes]
 
     @swagger_auto_schema(manual_parameters=[openapi.Parameter('search', openapi.IN_QUERY, description="Search by bedroom, property_type, price, state, or status", type=openapi.TYPE_STRING),], responses={200: 'OK', 404: 'NOT FOUND'})
