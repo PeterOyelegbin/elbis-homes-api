@@ -2,14 +2,13 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
-from django_rest_passwordreset.models import ResetPasswordToken
 from django.contrib.auth import authenticate
 from drf_yasg.utils import swagger_auto_schema
 from datetime import timedelta
 from threading import Thread
 from utils import CustomJWTAuthentication, send_async_email, cache, general_logger
 from .serializers import SignUpSerializer, LogInSerializer, ResetPasswordSerializer, ConfirmPasswordSerializer
-from .models import UserModel
+from .models import UserModel, CustomPasswordResetToken
 
 # Create your views here.
 class SignUpView(viewsets.ViewSet):
@@ -155,9 +154,9 @@ class ResetPasswordView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             email = serializer.validated_data.get('email')
             user = UserModel.objects.get(email=email)
-            token, _ = ResetPasswordToken.objects.get_or_create(user=user)
+            token, _ = CustomPasswordResetToken.objects.get_or_create(user=user)
             email_subject = 'ELBIS Homes: Password Reset Request'
-            email_body = f"""Dear {user},\n\nYou have requested a password reset. Use the following token to reset your password:\n\nToken: {token.key}\n\nPS: Please ignore if you did not initiate this process.\n\nRegards,\nELBIS Homes"""
+            email_body = f"""Dear {user},\n\nYou have requested a password reset. Use the following token to reset your password within the next 10 minutes before expiration:\n\nToken: {token.key}\n\nPS: Please ignore if you did not initiate this process.\n\nRegards,\nELBIS Homes"""
             recipient = [user.email]
             # Asynchronously handle send mail
             Thread(target=send_async_email, args=(email_subject, email_body, recipient)).start()
@@ -193,14 +192,22 @@ class ConfirmPasswordView(viewsets.ViewSet):
     serializer_class = ConfirmPasswordSerializer
     permission_classes = [AllowAny]
     
-    @swagger_auto_schema(request_body=ConfirmPasswordSerializer, responses={200: 'OK', 400: 'BAD REQUEST', 500:'SERVER ERROR'})
+    @swagger_auto_schema(request_body=ConfirmPasswordSerializer, responses={200: 'OK', 400: 'BAD REQUEST', 406: 'NOT ACCEPTABLE', 500:'SERVER ERROR'})
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             otp_token = serializer.validated_data.get('token')
             password = serializer.validated_data.get('password')
-            token = ResetPasswordToken.objects.select_related('user').get(key=otp_token)
+            token = CustomPasswordResetToken.objects.select_related('user').get(key=otp_token)
+            if token.is_expired():
+                token.delete()
+                response_data = {
+                    'success': False,
+                    'status': 406,
+                    'message': 'Token has expired!',
+                }
+                return Response(response_data, status=status.HTTP_406_NOT_ACCEPTABLE)
             user = token.user
             user.set_password(password)
             user.save()
@@ -211,12 +218,12 @@ class ConfirmPasswordView(viewsets.ViewSet):
                 'message': 'Password has been reset successfully.',
             }
             return Response(response_data, status=status.HTTP_200_OK)
-        except ResetPasswordToken.DoesNotExist as e:
+        except CustomPasswordResetToken.DoesNotExist as e:
             general_logger.error("Token error occurred: %s", e)
             response_data = {
                 'success': False,
                 'status': 400,
-                'message': 'Invalid or expired token!',
+                'message': 'Invalid token!',
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

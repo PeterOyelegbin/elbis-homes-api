@@ -1,7 +1,12 @@
 from django.db import models
+from django.utils.timezone import now
 from django.contrib.auth.models import AbstractUser
+from django_rest_passwordreset.models import ResetPasswordToken
 from uuid import uuid4
+from datetime import timedelta
 from .utils import UserModelManager
+import random
+
 
 # Create your models here.
 class UserModel(AbstractUser):
@@ -24,3 +29,26 @@ class UserModel(AbstractUser):
 
     class Meta:
         ordering = ['-date_joined']
+
+
+class CustomPasswordResetToken(ResetPasswordToken):
+    """
+    Proxy model to override the behavior of ResetPasswordToken.
+    """
+    class Meta:
+        proxy = True
+
+    @staticmethod
+    def generate_key():
+        """
+        Override the generate_key method to generate a 6-digit OTP.
+        """
+        return f"{random.randint(100000, 999999)}"
+
+    def is_expired(self):
+        """
+        Check if the OTP has expired.
+        """
+        expiration_time = timedelta(minutes=10) #Set expiration duration to 10 minutes
+        return now() > self.created_at + expiration_time
+    
