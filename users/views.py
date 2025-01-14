@@ -78,8 +78,8 @@ class LogInView(viewsets.ViewSet):
                     'success': True,
                     'status': 200,
                     'message': 'Login successful',
-                    'access_token': str(access_token),
-                    'username': user
+                    'username': str(user),
+                    'access_token': str(access_token)
                 }
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
