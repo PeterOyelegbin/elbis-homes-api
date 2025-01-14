@@ -35,7 +35,9 @@ class SignUpView(viewsets.ViewSet):
                     'success': True,
                     'status': 200,
                     'message': 'Signup successful',
-                    'access_token': str(access_token),
+                    'first_name': serializer.data['first_name'],
+                    'last_name': serializer.data['last_name'],
+                    'access_token': str(access_token)
                 }
                 return Response(response_data, status=status.HTTP_201_CREATED)
             else:
