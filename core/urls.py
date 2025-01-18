@@ -19,7 +19,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from users.views import SignUpView, LogInView, LogOutView, ResetPasswordView, ConfirmPasswordView
+from users.views import UsersView, SignUpView, LogInView, LogOutView, ResetPasswordView, ConfirmPasswordView
 from properties.views import PropertyViewSet, FavoriteViewSet, EnquiryViewSet
 
 # Swagger UI
@@ -37,6 +37,7 @@ schema_view = get_schema_view(
 )
 
 router = DefaultRouter(trailing_slash=False)
+router.register(r'users', UsersView, basename="manage_user")
 router.register(r'users/signup', SignUpView, basename="signup")
 router.register(r'users/login', LogInView, basename="login")
 router.register(r'users/logout', LogOutView, basename="logout")

@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.core.validators import MinLengthValidator
 from .models import UserModel
 
 
@@ -8,7 +7,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ('first_name', 'last_name', 'email', 'password')
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'is_staff')
 
     def create(self, validated_data):
         user = UserModel.objects.create_user(**validated_data)
@@ -29,4 +28,4 @@ class ResetPasswordSerializer(serializers.Serializer):
 
 class ConfirmPasswordSerializer(serializers.Serializer):
     token = serializers.CharField()
-    password = serializers.CharField(validators=[MinLengthValidator(6)])
+    password = serializers.CharField(min_length=6)

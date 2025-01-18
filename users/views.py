@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import authenticate
 from drf_yasg.utils import swagger_auto_schema
@@ -11,6 +11,80 @@ from .serializers import SignUpSerializer, LogInSerializer, ResetPasswordSeriali
 from .models import UserModel, CustomPasswordResetToken
 
 # Create your views here.
+class UsersView(viewsets.ViewSet):
+    """
+    User Management Endpoint
+
+    Manage all registered users. 
+    """
+    serializer_class = SignUpSerializer
+    
+    def get_permissions(self):
+        """
+        Return the appropriate permissions based on the action.
+        """
+        if self.action in ['list']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
+    @swagger_auto_schema(responses={200: 'OK', 204: 'NO CONTENT', 500: 'SERVER ERROR'})
+    def list(self, request):
+        try:
+            queryset = UserModel.objects.all()
+            serializer = self.serializer_class(queryset, many=True)
+            response_data = {
+                'success': True,
+                'status': 200,
+                'message': 'Users retrieved successfully',
+                'data': serializer.data
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            response_data = {
+                'success': True,
+                'status': 204,
+                'message': 'No user found',
+            }
+            return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            general_logger.error("An error occurred: %s", e)
+            response_data = {
+                'success': False,
+                'status': 500,
+                'message': 'An error occurred while fetching users',
+            }
+            return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    @swagger_auto_schema(responses={200: 'OK', 404: 'NOT FOUND', 500: 'SERVER_ERROR'})
+    def destroy(self, request, pk=None):
+        try:
+            user = UserModel.objects.get(pk=pk)
+            user.delete()
+            response_data = {
+                'success': True,
+                'status': 200,
+                'message': 'User deleted successfully',
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            response_data = {
+                'success': False,
+                'status': 404,
+                'message': 'User does not exist',
+            }
+            return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            general_logger.error("An error occurred: %s", e)
+            response_data = {
+                'success': False,
+                'status': 500,
+                'message': 'An error occurred while deleting user',
+            }
+            return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
 class SignUpView(viewsets.ViewSet):
     """
     User Signup Endpoint
