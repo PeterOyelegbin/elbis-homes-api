@@ -37,7 +37,7 @@ schema_view = get_schema_view(
 )
 
 router = DefaultRouter(trailing_slash=False)
-router.register(r'users', UsersView, basename="manage_user")
+router.register(r'users/manage', UsersView, basename="manage_user")
 router.register(r'users/signup', SignUpView, basename="signup")
 router.register(r'users/login', LogInView, basename="login")
 router.register(r'users/logout', LogOutView, basename="logout")
