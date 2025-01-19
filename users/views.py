@@ -23,7 +23,9 @@ class UsersView(viewsets.ViewSet):
         """
         Return the appropriate permissions based on the action.
         """
-        if self.action == 'destroy':
+        if self.action in ['list']:
+            permission_classes = [AllowAny]
+        else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
