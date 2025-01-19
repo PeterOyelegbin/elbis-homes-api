@@ -19,13 +19,13 @@ class UsersView(viewsets.ViewSet):
     """
     serializer_class = SignUpSerializer
     
-    # def get_permissions(self):
-    #     """
-    #     Return the appropriate permissions based on the action.
-    #     """
-    #     if self.action != 'list':
-    #         permission_classes = [IsAdminUser]
-    #     return [permission() for permission in permission_classes]
+    def get_permissions(self):
+        """
+        Return the appropriate permissions based on the action.
+        """
+        if self.action == 'destroy':
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
 
     @swagger_auto_schema(responses={200: 'OK', 204: 'NO CONTENT', 500: 'SERVER ERROR'})
     def list(self, request):
